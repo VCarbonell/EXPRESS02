@@ -17,10 +17,10 @@ const getUsersById = (req, res) => {
   database
     .query('select * from users where id = ?', [id])
     .then(([users]) => {
-      if (users) {
-        res.status(200).json(users);
-      } else {
+      if (!users[0]) {
         res.status(404).send('Not Found');
+      } else {
+        res.status(200).json(users);
       }
     })
     .catch((err) => {
