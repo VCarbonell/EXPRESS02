@@ -25,6 +25,7 @@
     "mysql2": "^2.3.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.19"
+    "nodemo": "^1.0.0",
+    "nodemon": "^2.0.20"
   }
 }
