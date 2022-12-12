@@ -2,7 +2,7 @@
 const database = require('./database');
 
 const getUsers = (req, res) => {
-  let sql = 'SELECT * FROM users';
+  let sql = 'SELECT id, firstname, lastname, email, city, language FROM users';
   const sqlValues = [];
 
   if (req.query.language != null) {
@@ -49,11 +49,10 @@ const getUsersById = (req, res) => {
 
 const postUser = (req, res) => {
   const {
-    firstname, lastname, email, city, language,
+    firstname, lastname, email, city, language, hashedPassword,
   } = req.body;
-
   database
-    .query('INSERT INTO users (firstname, lastname, email, city, language) VALUES (?,?,?,?,?)', [firstname, lastname, email, city, language])
+    .query('INSERT INTO users (firstname, lastname, email, city, language, hashedPassword) VALUES (?,?,?,?,?,?)', [firstname, lastname, email, city, language, hashedPassword])
     .then(([result]) => {
       res.location(`/api/users/${result.insertId}`).sendStatus(201);
     })
