@@ -67,37 +67,64 @@ const updateUser = (req, res) => {
     firstname, lastname, email, city, language,
   } = req.body;
   const id = parseInt(req.params.id);
+  
+  if (req.payload.sub !== id) {
+    res.sendStatus(403);
+  } else {
+    database
+      .query(`UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ${id}`, [firstname, lastname, email, city, language])
+      .then(([result]) => {
+        if (result.affectedRows === 0) {
+          res.status(404).send('User not found');
+        } else {
+          res.sendStatus(204);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error update user');
+      });
+  }
 
-  database
-    .query(`UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ${id}`, [firstname, lastname, email, city, language])
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send('User not found');
-      } else {
-        res.sendStatus(204);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send('Error update user');
-    });
 };
 
 const deleteUser = (req, res) => {
   const id = parseInt(req.params.id);
 
+  if (req.payload.sub !== id) {
+    res.sendStatus(403);
+  } else {
+    database
+      .query(`DELETE FROM users WHERE id = ${id}`)
+      .then(([result]) => {
+        if (result.affectedRows === 0) {
+          res.status(404).send('User not found');
+        } else {
+          res.sendStatus(204);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error deleting user');
+      });  
+  }
+};
+
+const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
+  const { email } = req.body;
   database
-    .query(`DELETE FROM users WHERE id = ${id}`)
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send('User not found');
+    .query('SELECT * FROM users WHERE email = ?', [email])
+    .then(([user]) => {
+      if (user[0] !== null) {
+        req.user = user[0];
+        next();
       } else {
-        res.sendStatus(204);
+        res.status(404).send('User not found');
       }
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send('Error deleting user');
+      res.sendStatus(401);
     });
 };
 
@@ -107,4 +134,5 @@ module.exports = {
   postUser,
   updateUser,
   deleteUser,
+  getUserByEmailWithPasswordAndPassToNext,
 };
